@@ -1,0 +1,29 @@
+/* __APP_NAME__ — the app's palette and layout.
+ *
+ * The shell contract: the shell defines chrome and reads these six tokens; the
+ * app defines them. All six are required — the shell provides no fallbacks.
+ */
+
+:root {
+    --bg: #080808;
+    --surface: #101010;
+    --border: #262626;
+    --text: #e8e8e8;
+    --dim: #8a8a8a;
+    --accent: #ff5a1f;
+}
+
+/* The desktop build (html.desktop, set by kit/bridge-core.js) hides the
+ * shell's website-only pieces. */
+html.desktop .shell-backlink,
+html.desktop .shell-footer {
+    display: none;
+}
+
+#stage {
+    padding: 2rem;
+}
+
+.placeholder {
+    color: var(--dim);
+}

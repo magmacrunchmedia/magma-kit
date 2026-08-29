@@ -1,0 +1,33 @@
+# magma-kit — the Rust side of the shared desktop-app kit.
+#
+# Consumed as a sibling path dependency:
+#     magma-kit = { path = "../../../magma-kit/crate" }
+#
+# The base crate has NO tauri dependency — fs, log, anchor and the dirty flag
+# are plain Rust, so `cargo test` here is instant and an app pays only for what
+# it wires up. The pieces that need tauri types are behind features:
+#
+#     dialog     dirty::confirm_close — the unsaved-changes close guard
+#     autostart  the autostart wrapper that refuses in debug builds
+
+[package]
+name = "magma-kit"
+version = "0.1.0"
+description = "Shared Tauri-app infrastructure: fs bridge, log file, popover anchoring, dirty tracking, autostart"
+edition = "2021"
+rust-version = "1.77"
+license = "PolyForm-Noncommercial-1.0.0"
+
+[lib]
+name = "magma_kit"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = [], optional = true }
+tauri-plugin-dialog = { version = "2", optional = true }
+tauri-plugin-autostart = { version = "2", optional = true }
+
+[features]
+default = []
+dialog = ["dep:tauri", "dep:tauri-plugin-dialog"]
+autostart = ["dep:tauri", "dep:tauri-plugin-autostart"]

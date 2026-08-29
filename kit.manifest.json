@@ -1,0 +1,16 @@
+{
+  "comment": "The vendoring contract: kit file -> destination inside a consumer repo. scripts/sync.mjs is the only thing that writes these into a consumer; the kit version comes from package.json, not from here.",
+  "files": {
+    "js/boot.js": "app/kit/boot.js",
+    "js/bridge-core.js": "app/kit/bridge-core.js",
+    "js/keys.js": "app/kit/keys.js",
+    "js/history.js": "app/kit/history.js",
+    "js/prefs.js": "app/kit/prefs.js",
+    "js/modal.js": "app/kit/modal.js",
+    "js/dom.js": "app/kit/dom.js",
+    "testkit/assert.mjs": "tests/kit/assert.mjs",
+    "testkit/harness.mjs": "tests/kit/harness.mjs",
+    "testkit/canvas-shim.mjs": "tests/kit/canvas-shim.mjs",
+    "testkit/versions.mjs": "tests/kit/versions.mjs"
+  }
+}

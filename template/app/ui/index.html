@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" data-app="__APP_NS__">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>__APP_NAME__</title>
+    <link rel="stylesheet" href="../shell/fonts.css">
+    <link rel="stylesheet" href="../shell/app-shell.css">
+    <link rel="stylesheet" href="../shell/toast.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>__APP_NAME__</h1>
+    </header>
+
+    <main id="stage">
+        <p class="placeholder">__APP_NAME__ — start here.</p>
+    </main>
+
+    <footer class="app-footer">
+        <span id="app-version"></span>
+    </footer>
+
+    <!-- Load order is the dependency order, asserted by tests/run.mjs.
+         kit/boot.js is FIRST: it exists to report failures in everything
+         after it. Then the rest of the kit, then core/ (pure), then ui/. -->
+    <script src="../kit/boot.js"></script>
+    <script src="../kit/bridge-core.js"></script>
+    <script src="../kit/keys.js"></script>
+    <script src="../kit/history.js"></script>
+    <script src="../kit/prefs.js"></script>
+    <script src="../kit/modal.js"></script>
+    <script src="../kit/dom.js"></script>
+    <script src="../shell/toast.js"></script>
+    <script src="../core/sample.js"></script>
+    <script src="bridge.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
