@@ -76,6 +76,56 @@ export default function () {
         ok(!a.h.canUndo(), 'the stroke was pushed exactly once');
     });
 
+    /* ── beginStroke is idempotent ──
+       All three consuming apps had independently wrapped this in an `inStroke`
+       latch before the guard moved in here. Every one of them drives it from
+       an event that REPEATS — a colour picker fires `input` continuously
+       through a drag, and so does a range slider — so re-snapshotting on each
+       call captured the already-dragged state and turned one drag into
+       hundreds of undo entries. */
+    test('beginStroke called repeatedly keeps the FIRST state', () => {
+        const a = editor();
+        a.state = 1;
+        a.h.beginStroke();     // opens on 1
+        a.state = 2;
+        a.h.beginStroke();     // must NOT re-snapshot
+        a.state = 3;
+        a.h.beginStroke();
+        a.state = 9;
+        a.h.commitStroke();
+
+        a.h.undo();
+        eq(a.state, 1, 'undo goes back to where the drag started, not part-way through');
+    });
+
+    test('a whole drag is one undo entry however many times it fires', () => {
+        const a = editor();
+        for (let i = 0; i < 200; i++) { a.h.beginStroke(); a.state = i; }
+        a.h.commitStroke();
+        eq(a.h.undo(), true, 'one entry to undo');
+        eq(a.h.undo(), false, 'and only one');
+    });
+
+    test('a committed stroke re-opens on the next beginStroke', () => {
+        const a = editor();
+        a.state = 1;
+        a.h.beginStroke(); a.state = 2; a.h.commitStroke();
+        a.h.beginStroke(); a.state = 3; a.h.commitStroke();
+        a.h.undo();
+        eq(a.state, 2, 'the second drag started from 2');
+        a.h.undo();
+        eq(a.state, 1, 'and the first from 1');
+    });
+
+    test('a cancelled stroke re-opens too', () => {
+        const a = editor();
+        a.state = 1;
+        a.h.beginStroke(); a.state = 5; a.h.cancelStroke();
+        a.h.beginStroke(); a.state = 7; a.h.commitStroke();
+        a.h.undo();
+        eq(a.state, 5, 'the second stroke opened on 5, not on the cancelled 1');
+    });
+
     test('cancelStroke forgets the pending snapshot', () => {
         const a = editor();
         a.h.beginStroke(); a.state = 1;

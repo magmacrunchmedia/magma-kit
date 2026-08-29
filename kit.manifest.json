@@ -8,6 +8,8 @@
     "js/prefs.js": "app/kit/prefs.js",
     "js/modal.js": "app/kit/modal.js",
     "js/dom.js": "app/kit/dom.js",
+    "js/artstore.js": "app/kit/artstore.js",
+    "js/menu.js": "app/kit/menu.js",
     "testkit/assert.mjs": "tests/kit/assert.mjs",
     "testkit/harness.mjs": "tests/kit/harness.mjs",
     "testkit/canvas-shim.mjs": "tests/kit/canvas-shim.mjs",

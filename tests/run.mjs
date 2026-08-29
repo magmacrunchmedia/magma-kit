@@ -8,7 +8,7 @@ const suites = [
     './history.test.mjs',
     './prefs.test.mjs',
     './modal.test.mjs',
-    './dom.test.mjs',
+    './dom.test.mjs', './artstore.test.mjs', './menu.test.mjs',
     './boot.test.mjs',
     './harness.test.mjs',
     './versions.test.mjs',
