@@ -15,6 +15,15 @@ import { join } from 'node:path';
  *                      (default ['index.html'])
  * @param opts.slotId   id of the footer element the version is fetched into,
  *                      or null to skip that check (default 'app-version')
+ * @param opts.markup   what the markup may say about the version:
+ *                      'none' (default) — the page asks the binary, so a
+ *                        literal vX.Y.Z anywhere in it is a version that was
+ *                        right the day it was written and wrong ever after;
+ *                      'must-match' — the app also has a web build, which has
+ *                        no binary to ask, so the page carries the version;
+ *                        then it must AGREE with Cargo.toml. This is the check
+ *                        that stops a hidden footer sitting at an old version
+ *                        through several releases.
  * @param opts.manifests npm manifests that must stay private
  *                      (default package.json + desktop/package.json)
  * @returns a suite function for the app's runner: (test, eq, ok) => void
@@ -24,6 +33,7 @@ export function versionSuite(opts) {
         root,
         pages = ['index.html'],
         slotId = 'app-version',
+        markup = 'none',
         manifests = [['package.json'], ['desktop', 'package.json']],
     } = opts;
     const read = (...p) => readFileSync(join(root, ...p), 'utf8');
@@ -49,14 +59,29 @@ export function versionSuite(opts) {
         });
 
         // A hardcoded "vX.Y.Z" is right the day it is written and wrong
-        // forever after.
-        test('no version string is hardcoded into the markup', () => {
-            for (const page of pages) {
-                const html = read('app', 'ui', page);
-                const hits = html.match(/v\d+\.\d+\.\d+/g) || [];
-                eq(hits, [], `${page} states no version — it asks the binary instead`);
-            }
-        });
+        // forever after — unless the app has a web build, which has no binary
+        // to ask, in which case the markup carries it and the check becomes
+        // "does it still agree".
+        if (markup === 'none') {
+            test('no version string is hardcoded into the markup', () => {
+                for (const page of pages) {
+                    const html = read('app', 'ui', page);
+                    const hits = html.match(/v\d+\.\d+\.\d+/g) || [];
+                    eq(hits, [], `${page} states no version — it asks the binary instead`);
+                }
+            });
+        } else {
+            test('the version in the markup matches the binary version', () => {
+                for (const page of pages) {
+                    const html = read('app', 'ui', page);
+                    const hits = [...new Set(html.match(/v\d+\.\d+\.\d+/g) || [])];
+                    for (const hit of hits) {
+                        eq(hit, `v${version}`,
+                            `${page} carries the version for the web build, which has no binary to ask`);
+                    }
+                }
+            });
+        }
 
         if (slotId) {
             test('the footer has somewhere to put the version it fetches', () => {
