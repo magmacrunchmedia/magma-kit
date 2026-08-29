@@ -50,7 +50,7 @@ test('index.html loads kit, core and ui in order', () => {
     ok(firstUi > lastCore, 'bridge.js loads after every core/ module');
 });
 
-const suites = ['./sample.test.mjs', './version.test.mjs'];
+const suites = ['./sample.test.mjs', './version.test.mjs', './kit-integrity.test.mjs'];
 for (const s of suites) {
     await Promise.race([
         (async () => (await import(s)).default(M))(),

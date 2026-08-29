@@ -13,6 +13,11 @@ const suites = [
     './harness.test.mjs',
     './versions.test.mjs',
     './sync.test.mjs',
+    './kit-integrity.test.mjs',
+    // Last, and the only suite that reaches outside this repo: it asks whether
+    // the apps vendoring this kit still hold the current copy. Consumers that
+    // are not checked out are skipped, not failed.
+    './consumers.test.mjs',
 ];
 
 // Awaited: an async suite that is merely called reports zero passes and zero

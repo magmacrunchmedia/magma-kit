@@ -29,13 +29,25 @@ npm run check:kit    # node ../magma-kit/scripts/sync.mjs --check .
 are byte-copies; `app/kit/KIT.md` records the kit version and per-file hashes.
 Edit kit files **here**, never in a consumer, then re-sync every consumer.
 
+Two guards keep that honest, one at each end. A consumer's own `npm run check`
+verifies its vendored files against its own `KIT.md` (hermetic — no kit
+checkout needed), catching a file edited in place. This repo's `npm run check`
+verifies every app listed in `consumers.json`, catching a kit file changed
+here and never synced out. Add new apps to that list.
+
 ## New app
 
 ```
-node scripts/new-app.mjs ../my-app --name "MY//APP" --ns MyApp
+node scripts/new-app.mjs ../my-app --name "MY//APP" --ns MyApp --from ../sprite-forge
 ```
 
-Then follow the checklist it prints (shell chrome, fonts, icons, git init).
+`--from` carries `app/shell/`, `app/fonts/` and `desktop/src-tauri/icons/`
+across from an existing app, which is what makes the result build and run
+immediately — `tauri-build` refuses to compile without icons. Without the
+flag the script stamps anyway and prints what is still missing.
+
+Then: `npm install` (root and `desktop/`), `npm run check`, `cd desktop &&
+npm run dev`, `git init`, and add the app to `consumers.json`.
 
 ## Developing the kit
 

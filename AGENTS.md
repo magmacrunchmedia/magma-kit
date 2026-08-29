@@ -13,6 +13,30 @@ caps, snapshot callbacks, command names — is a PARAMETER the app passes in,
 never an edit to a kit file. If a kit file needs app-specific content, the
 design is wrong; move the content to the app and pass it in.
 
+### Drift is guarded from both ends
+
+Vendoring has two ways to rot, and each is caught by the side that can see it:
+
+- **A vendored file edited in place.** Caught in the consumer, by its own
+  `npm run check`: `testkit/kit-integrity.mjs` verifies `app/kit/` and
+  `tests/kit/` against the sha256 rows in that app's own `app/kit/KIT.md`. It
+  needs nothing but that repo — no kit checkout, no network — which is why it
+  can live in `check` at all.
+- **A kit file changed here and never synced out.** Invisible from the
+  consumer, because KIT.md travels with the files, so an old-but-consistent
+  vendoring verifies clean. Caught HERE, by `tests/consumers.test.mjs`, which
+  runs `sync.mjs --check` against every path in `consumers.json` — at the
+  moment the change is made, which is the moment the risk is created.
+
+`consumers.json` skips paths that are not checked out rather than failing, so
+this repo stays checkable on a machine holding only part of the family. **When
+you stamp a new app, add it to that list** — `new-app.mjs` prints the
+reminder, and nothing else will.
+
+`npm run check:kit` in a consumer answers the sharper question ("am I behind
+the kit?") but needs the sibling present, so it stays out of `check` and stays
+manual.
+
 ## js/ is classic scripts, not ES modules — do not convert
 
 Same rule as sprite-forge and magma-ops-app, and it comes from the website:

@@ -11,6 +11,7 @@
     "testkit/assert.mjs": "tests/kit/assert.mjs",
     "testkit/harness.mjs": "tests/kit/harness.mjs",
     "testkit/canvas-shim.mjs": "tests/kit/canvas-shim.mjs",
-    "testkit/versions.mjs": "tests/kit/versions.mjs"
+    "testkit/versions.mjs": "tests/kit/versions.mjs",
+    "testkit/kit-integrity.mjs": "tests/kit/kit-integrity.mjs"
   }
 }

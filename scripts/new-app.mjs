@@ -2,11 +2,28 @@
 // new-app.mjs — stamp out a new app from template/.
 //
 //   node scripts/new-app.mjs ../my-app --name "MY//APP" --ns MyApp
+//   node scripts/new-app.mjs ../my-app --name "MY//APP" --ns MyApp --from ../sprite-forge
 //
-// Deliberately thin: it copies, replaces four placeholders, syncs the kit, and
-// prints the checklist. The checklist in the new README is the contract; this
-// script is convenience. Everything it cannot do (vendoring chrome, fonts,
-// icons, git init) is on that list rather than half-automated here.
+// Copies the template, replaces five placeholders, syncs the kit, and — given
+// --from — carries the chrome across from an existing app so the result builds
+// and runs on the first try rather than after a six-step checklist.
+//
+// The three donated directories are the three the template deliberately does
+// not carry its own copies of:
+//
+//   app/shell/                    vendored chrome; the website repo is upstream
+//   app/fonts/                    self-hosted faces the CSP requires
+//   desktop/src-tauri/icons/      tauri-build REFUSES TO BUILD without these
+//
+// That last one is why this flag exists. A stamped app with no icons does not
+// fail with a checklist reminder, it fails inside tauri-build, which is a bad
+// first five minutes with a new tool.
+//
+// app/shell/fonts.css travels cleanly because every app in this family puts
+// shell/ and fonts/ as siblings under app/, so its `url('../fonts/...')`
+// resolves the same everywhere. That is the one path assumption in the shell
+// (see website/ware/shell/README.md), and copying between two apps at equal
+// depth does not disturb it. Verify it if the layout ever changes.
 //
 // Placeholders:
 //   __APP_NAME__       display name, e.g. "CARD//FORGE"
@@ -15,7 +32,7 @@
 //   __app_snake__      snake id, e.g. card_forge (Rust lib name)
 //   __APP_ENV_PREFIX__ shouty snake, e.g. CARD_FORGE (env overrides)
 
-import { readdirSync, readFileSync, writeFileSync, mkdirSync, statSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, statSync, existsSync, cpSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, basename } from 'node:path';
 import { sync } from './sync.mjs';
@@ -23,9 +40,16 @@ import { sync } from './sync.mjs';
 const KIT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TEMPLATE = join(KIT, 'template');
 
+// What --from carries across, and whether the app is unusable without it.
+const DONATED = [
+    { path: join('app', 'shell'), what: 'chrome', fatal: false },
+    { path: join('app', 'fonts'), what: 'typefaces', fatal: false },
+    { path: join('desktop', 'src-tauri', 'icons'), what: 'icons', fatal: true },
+];
+
 // Files copied byte-for-byte: a placeholder inside one would be data, not a
-// name to stamp. (None today — listed so the rule has a home.)
-const BINARY = /\.(png|ico|icns|woff2?|ttf)$/i;
+// name to stamp.
+const BINARY = /\.(png|ico|icns|woff2?|ttf|svg)$/i;
 
 function replacements(name, ns) {
     const slug = ns.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
@@ -66,7 +90,7 @@ const target = positional[0];
 const flag = (f) => flags[f] || null;
 
 if (!target) {
-    console.error('usage: new-app.mjs <dir> --name "MY//APP" --ns MyApp');
+    console.error('usage: new-app.mjs <dir> --name "MY//APP" --ns MyApp [--from ../donor-app]');
     process.exit(2);
 }
 
@@ -79,16 +103,53 @@ if (existsSync(root) && readdirSync(root).length) {
     process.exit(1);
 }
 
+const donor = flag('--from') ? resolve(flag('--from')) : null;
+if (donor && !existsSync(donor)) {
+    console.error(`--from ${donor} does not exist`);
+    process.exit(1);
+}
+
 const subs = replacements(name, ns);
 copyTree(TEMPLATE, root, subs);
 const n = sync(root);
 
 console.log(`stamped ${name} (${ns}) into ${root}`);
 console.log(`synced ${n} kit files`);
-console.log('\nNext — see the README there:');
-console.log('  1. vendor app/shell/ from website/ware/shell (fork fonts.css for this depth)');
-console.log('  2. copy app/fonts/ from a sibling app');
-console.log('  3. add desktop/src-tauri/icons/');
-console.log('  4. npm install (root and desktop/)');
-console.log('  5. npm run check, then cd desktop && npm run dev');
-console.log('  6. git init and a first commit');
+
+// Carry the chrome across, and be loud about anything the donor turned out not
+// to have — a silently missing icons/ is a build failure several minutes later,
+// somewhere that does not mention this script.
+const outstanding = [];
+if (donor) {
+    for (const { path, what, fatal } of DONATED) {
+        const from = join(donor, path);
+        if (!existsSync(from)) {
+            outstanding.push({ path, what, fatal });
+            continue;
+        }
+        cpSync(from, join(root, path), { recursive: true });
+        console.log(`copied ${path} (${what}) from ${basename(donor)}`);
+    }
+} else {
+    outstanding.push(...DONATED);
+}
+
+console.log('');
+if (outstanding.length) {
+    console.log('STILL NEEDED:');
+    for (const { path, what, fatal } of outstanding) {
+        console.log(`  ${path} — ${what}${fatal ? '   ** the Rust build FAILS without this **' : ''}`);
+    }
+    if (!donor) console.log('  (or re-stamp with --from ../sprite-forge to copy all three)');
+    console.log('');
+}
+
+console.log('Next:');
+console.log(`  cd ${target}`);
+console.log('  npm install && (cd desktop && npm install)');
+console.log('  npm run check');
+console.log('  cd desktop && npm run dev');
+console.log('  git init  # then a first commit');
+console.log('');
+console.log(`Add "${target}" to magma-kit/consumers.json so the kit's own tests`);
+console.log('keep this app in sync when a kit file changes.');
