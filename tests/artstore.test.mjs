@@ -1,7 +1,7 @@
 import { test, eq, ok } from '../testkit/assert.mjs';
 import { kit } from './load.mjs';
 
-/* Came up from deck-forge with the module. The only change is that the store
+/* Came up from deck-press with the module. The only change is that the store
    is a factory now, so each test constructs its own rather than resetting a
    singleton — which is also what stops these tests leaking into each other.
 

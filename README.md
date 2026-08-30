@@ -78,7 +78,7 @@ Things a second app has now hand-rolled, which the extraction rule says are
 eligible, and which have not moved for a stated reason. Recorded so the next
 person does not have to rediscover them.
 
-- **`scripts/make-icon.mjs`** — deck-forge and gatefold both have one: a
+- **`scripts/make-icon.mjs`** — deck-press and gatefold both have one: a
   palette, a 32x32 grid of indices, a PNG encoder and an ICO writer, identical
   below each app's `DESIGNS` registry. What stops it moving is the vendoring
   mechanism rather than the rule: the manifest carries `js/` and `testkit/`,
@@ -88,5 +88,5 @@ person does not have to rediscover them.
   doing when a third app needs an icon; not worth designing for two.
 - **The project shell** — `currentPath`, Save vs Save As, `confirmDiscard`, the
   filename in the header. sprite-forge and gatefold have full versions and
-  deck-forge has half of one, so extracting today would mean designing the
+  deck-press has half of one, so extracting today would mean designing the
   union rather than lifting it. Revisit with three real copies to diff.
