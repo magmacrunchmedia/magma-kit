@@ -3,7 +3,7 @@
   "paths": [
     "../sprite-forge",
     "../magmacrunch-ops/clients/magma-ops-app",
-    "../deck-forge",
+    "../deck-press",
     "../gatefold"
   ]
 }
