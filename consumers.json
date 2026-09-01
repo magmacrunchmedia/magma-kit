@@ -1,9 +1,9 @@
 {
   "comment": "Every repo that vendors this kit, relative to the kit root. The kit's own `npm run check` verifies each one it can find is still in sync — that is what catches an edit made HERE and never synced OUT, which is the drift the consumers cannot detect for themselves. A path that does not exist is skipped and reported, not failed, so the suite still passes on a machine that has only some of these checked out. Add a line when you stamp a new app.",
   "paths": [
-    "../sprite-forge",
-    "../magmacrunch-ops/clients/magma-ops-app",
-    "../deck-press",
-    "../gatefold"
+    "../../apps/sprite-forge",
+    "../../apps/magmacrunch-ops/clients/magma-ops-app",
+    "../../apps/deck-press",
+    "../../apps/gatefold"
   ]
 }
